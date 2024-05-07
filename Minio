@@ -1,0 +1,346 @@
+
+minio file upload:
+from minio import Minio
+from minio.error import S3Error
+import os
+
+def get_minio_client(access, secret):
+    return Minio(
+        'localhost:9000',
+        access_key=access,
+        secret_key=secret,
+        secure=False
+    )
+
+if __name__ == '__main__':
+    minio_client = get_minio_client('testkey', 'testsecret')
+
+    try:
+        minio_client.make_bucket('testbucket')
+        print("Bucket 'testbucket' created successfully.")
+    except S3Error as err:
+        if err.code == 'BucketAlreadyOwnedByYou':
+            print("Bucket 'testbucket' already exists and is owned by you.")
+        else:
+            print("An error occurred:", err)
+    
+    try:
+        with open('/tmp/test.txt','rb') as testfile:
+            statdata=os.stat('/tmp/test.txt')
+            minio_client.put_object(
+                'testbucket',
+                'miniotest.txt',
+                testfile,
+                statdata.st_size
+
+            )
+    except S3Error as err:
+            print("An error occurred:", err)
+            
+ minio file remove:
+ from minio import Minio
+from minio.error import S3Error
+import os
+
+def get_minio_client(access, secret):
+    return Minio(
+        'localhost:9000',
+        access_key=access,
+        secret_key=secret,
+        secure=False
+    )
+
+if __name__ == '__main__':
+    minio_client = get_minio_client('testkey', 'testsecret')
+
+    try:
+        minio_client.make_bucket('testbucket')
+        print("Bucket 'testbucket' created successfully.")
+    except S3Error as err:
+        if err.code == 'BucketAlreadyOwnedByYou':
+            print("Bucket 'testbucket' already exists and is owned by you.")
+        else:
+            print("An error occurred:", err)
+    
+    try:
+        minio_client.remove_object('testbucket','miniotest.txt')
+    except S3Error as err:
+        if err.code == 'BucketAlreadyOwnedByYou':
+            print("file uploaded")
+        else:
+            print("An error occurred:", err)
+            
+minio bucket remove:
+
+from minio import Minio
+from minio.error import S3Error
+import os
+
+def get_minio_client(access, secret):
+    return Minio(
+        'localhost:9000',
+        access_key=access,
+        secret_key=secret,
+        secure=False
+    )
+
+if __name__ == '__main__':
+    minio_client = get_minio_client('testkey', 'testsecret')
+
+    try:
+        minio_client.make_bucket('testbucket')
+        print("Bucket 'testbucket' created successfully.")
+    except S3Error as err:
+        if err.code == 'BucketAlreadyOwnedByYou':
+            print("Bucket 'testbucket' already exists and is owned by you.")
+        else:
+            print("An error occurred:", err)
+    
+    try:
+        minio_client.remove_bucket('testbucket')
+    except S3Error as err:
+        if err.code == 'BucketAlreadyOwnedByYou':
+            print("file uploaded")
+        else:
+            print("An error occurred:", err)
+
+
+
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~$ cd Desktop
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop$ ls
+ Bare-metal-1.zip       'Business idea.pptx'   Campus-master
+'BareMetal nasmin apu'   Campus-27-09-2023     HelloWorld
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop$ cd python
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ docker pull minio/minio
+Using default tag: latest
+latest: Pulling from minio/minio
+Digest: sha256:f95dc4fc35439654a71300f765b485e114e7a720318dbce24ccd4f324d1475cf
+Status: Image is up to date for minio/minio:latest
+docker.io/minio/minio:latest
+
+What's Next?
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ docker run -t -d -p 9000:900 --name minioTest \
+> -e "MINIO_ACCESS_KEY=testkey" \
+> -e "MINIO_SECRET_KEY=testsecret" \
+> -v /home/dev/mdata:/data \
+> minio/minio server /data
+docker: Error response from daemon: Conflict. The container name "/minioTest" is already in use by container "a6d12dcb7c53ae26b39feee70cf3d6e60dbb6a3bbf781f4edb54e2b8b475ddb5". You have to remove (or rename) that container to be able to reuse that name.
+See 'docker run --help'.
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ docker run -t -d -p 9000:900 --name minioTest -e "MINIO_ACCESS_KEY=testkey" -e "MINIO_SECRET_KEY=testsecret" -v /home/dev/mdata:/data minio/minio server /data
+b5f3f59dd7e1b9250e8b4a3c9889a08935d433e6d7a9a66ddc318d75aa22fd7f
+docker: Error response from daemon: error while creating mount source path '/host_mnt/home/dev/mdata': mkdir /host_mnt/home/dev: permission denied.
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ mkdir -p ~/mdata
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ chmod 777 ~/mdata
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ docker run -t -d -p 9000:9000 --name minioTest \
+-e "MINIO_ACCESS_KEY=testkey" \
+-e "MINIO_SECRET_KEY=testsecret" \
+-v ~/mdata:/data \
+minio/minio server /data
+docker: Error response from daemon: Conflict. The container name "/minioTest" is already in use by container "b5f3f59dd7e1b9250e8b4a3c9889a08935d433e6d7a9a66ddc318d75aa22fd7f". You have to remove (or rename) that container to be able to reuse that name.
+See 'docker run --help'.
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ docker run -t -d -p 9000:9000 --name minioTest -e "MINIO_ACCESS_KEY=testkey" -e "MINIO_SECRET_KEY=testsecret" -v ~/mdata:/data minio/minio server /data
+ac4ff2ebcee758a3870a19646f303966b71fd16ba53599aea2e515b706d18af4
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ docker ps -a
+CONTAINER ID   IMAGE                  COMMAND                  CREATED          STATUS          PORTS                    NAMES
+ac4ff2ebcee7   minio/minio            "/usr/bin/docker-ent…"   14 seconds ago   Up 13 seconds   0.0.0.0:9000->9000/tcp   minioTest
+9cf1e00daf6c   mongo-express:0.54.0   "tini -- /docker-ent…"   8 hours ago      Created                                  farm-part-1-main-mongo_express-1
+10645c7743a6   mongo:4.2.12           "docker-entrypoint.s…"   8 hours ago      Created                                  farm-part-1-main-mongo_db-1
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ mkdir minioConnect
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python$ cd minioConnect
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ sudo apt install python3-venv
+[sudo] password for hp: 
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+python3-venv is already the newest version (3.10.6-1~22.04).
+The following packages were automatically installed and are no longer required:
+  bridge-utils libflashrom1 libftdi1-2 libllvm13 ubuntu-fan
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 24 not upgraded.
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 -m venv venv
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ ll
+total 12
+drwxrwxr-x 3 hp hp 4096 May  7 22:21 ./
+drwxrwxr-x 3 hp hp 4096 May  7 22:20 ../
+drwxrwxr-x 5 hp hp 4096 May  7 22:21 venv/
+hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ . venv/bin/activate
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ pip3 install minio
+Collecting minio
+  Using cached minio-7.2.7-py3-none-any.whl (93 kB)
+Collecting certifi
+  Using cached certifi-2024.2.2-py3-none-any.whl (163 kB)
+Collecting pycryptodome
+  Using cached pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+Collecting argon2-cffi
+  Using cached argon2_cffi-23.1.0-py3-none-any.whl (15 kB)
+Collecting urllib3
+  Using cached urllib3-2.2.1-py3-none-any.whl (121 kB)
+Collecting typing-extensions
+  Using cached typing_extensions-4.11.0-py3-none-any.whl (34 kB)
+Collecting argon2-cffi-bindings
+  Using cached argon2_cffi_bindings-21.2.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (86 kB)
+Collecting cffi>=1.0.1
+  Using cached cffi-1.16.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (443 kB)
+Collecting pycparser
+  Using cached pycparser-2.22-py3-none-any.whl (117 kB)
+Installing collected packages: urllib3, typing-extensions, pycryptodome, pycparser, certifi, cffi, argon2-cffi-bindings, argon2-cffi, minio
+Successfully installed argon2-cffi-23.1.0 argon2-cffi-bindings-21.2.0 certifi-2024.2.2 cffi-1.16.0 minio-7.2.7 pycparser-2.22 pycryptodome-3.20.0 typing-extensions-4.11.0 urllib3-2.2.1
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ pip3 freeze
+argon2-cffi==23.1.0
+argon2-cffi-bindings==21.2.0
+certifi==2024.2.2
+cffi==1.16.0
+minio==7.2.7
+pycparser==2.22
+pycryptodome==3.20.0
+typing_extensions==4.11.0
+urllib3==2.2.1
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ pip3 freeze > requirements.txt
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ ll
+total 16
+drwxrwxr-x 3 hp hp 4096 May  7 22:23 ./
+drwxrwxr-x 3 hp hp 4096 May  7 22:20 ../
+-rw-rw-r-- 1 hp hp  171 May  7 22:23 requirements.txt
+drwxrwxr-x 5 hp hp 4096 May  7 22:21 venv/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ code .
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import (ResponseError,BucketAlreadyExists)
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import(ResponseError,BucketAlreadyExists)
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import(ResponseError,BucketAlreadyExists)
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import ResponseError, BucketAlreadyExists
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import ResponseError, BucketAlreadyExists
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import NoSuchBucket, BucketAlreadyOwnedByYou
+ImportError: cannot import name 'NoSuchBucket' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import ResponseError
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import ResponseError
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 2, in <module>
+    from minio.error import ResponseError
+ImportError: cannot import name 'ResponseError' from 'minio.error' (/home/hp/Desktop/python/minioConnect/venv/lib/python3.10/site-packages/minio/error.py)
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Bucket 'testbucket' created successfully.
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ cd ~/mdata/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ ll
+total 16
+drwxrwxrwx  4 hp hp 4096 May  7 22:38 ./
+drwxr-x--- 55 hp hp 4096 May  7 21:45 ../
+drwxr-xr-x  7 hp hp 4096 May  7 22:20 .minio.sys/
+drwxr-xr-x  2 hp hp 4096 May  7 22:38 testbucket/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ echo "content" >/tmp/test.txt
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ ll
+total 16
+drwxrwxrwx  4 hp hp 4096 May  7 22:38 ./
+drwxr-x--- 55 hp hp 4096 May  7 21:45 ../
+drwxr-xr-x  7 hp hp 4096 May  7 22:20 .minio.sys/
+drwxr-xr-x  2 hp hp 4096 May  7 22:38 testbucket/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ cd ~/Desktop/python/minioConnect
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Bucket 'testbucket' already exists and is owned by you.
+Traceback (most recent call last):
+  File "/home/hp/Desktop/python/minioConnect/minioConnect.py", line 28, in <module>
+    minioClient.put_object(
+NameError: name 'minioClient' is not defined. Did you mean: 'minio_client'?
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Bucket 'testbucket' already exists and is owned by you.
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ cd -
+/home/hp/mdata
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ cd testbucket/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ ll
+total 12
+drwxr-xr-x 3 hp hp 4096 May  8 00:58 ./
+drwxrwxrwx 4 hp hp 4096 May  7 22:38 ../
+drwxr-xr-x 2 hp hp 4096 May  8 00:58 miniotest.txt/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ cat miniotest.txt
+cat: miniotest.txt: Is a directory
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ cat miniotest.txt
+cat: miniotest.txt: Is a directory
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ cd miniotest.txt
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ ls
+xl.meta
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ cd -
+/home/hp/mdata/testbucket
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ ll
+total 12
+drwxr-xr-x 3 hp hp 4096 May  8 00:58 ./
+drwxrwxrwx 4 hp hp 4096 May  7 22:38 ../
+drwxr-xr-x 2 hp hp 4096 May  8 00:58 miniotest.txt/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ cd -
+/home/hp/mdata/testbucket/miniotest.txt
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ cd..
+cd..: command not found
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ cd .
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ cd -
+/home/hp/mdata/testbucket/miniotest.txt
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ cd -
+/home/hp/mdata/testbucket/miniotest.txt
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket/miniotest.txt$ cd ../../
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ cd ~/Desktop/python/minioConnect
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Bucket 'testbucket' already exists and is owned by you.
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ cd -
+/home/hp/mdata
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ cd testbucket/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ ll
+total 8
+drwxr-xr-x 2 hp hp 4096 May  8 01:08 ./
+drwxrwxrwx 4 hp hp 4096 May  7 22:38 ../
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata/testbucket$ cd --
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~$ cd ~/Desktop/python/minioConnect
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ cd --
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~$ cd ~/mdata
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ ll
+total 16
+drwxrwxrwx  4 hp hp 4096 May  7 22:38 ./
+drwxr-x--- 55 hp hp 4096 May  8 01:12 ../
+drwxr-xr-x  7 hp hp 4096 May  7 22:20 .minio.sys/
+drwxr-xr-x  2 hp hp 4096 May  8 01:08 testbucket/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ cd -
+/home/hp
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~$ cd ~/desktop/python/minioConnect
+bash: cd: /home/hp/desktop/python/minioConnect: No such file or directory
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~$ cd ~/Desktop/python/minioConnect
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ python3 minioConnect.py
+Bucket 'testbucket' already exists and is owned by you.
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/Desktop/python/minioConnect$ cd -
+/home/hp
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~$ cd ~/mdata
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ ll
+total 12
+drwxrwxrwx  3 hp hp 4096 May  8 01:15 ./
+drwxr-x--- 55 hp hp 4096 May  8 01:12 ../
+drwxr-xr-x  7 hp hp 4096 May  7 22:20 .minio.sys/
+(venv) hp@hp-HP-ProBook-440-G8-Notebook-PC:~/mdata$ 
+
+
+
